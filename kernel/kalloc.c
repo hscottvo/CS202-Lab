@@ -80,3 +80,19 @@ kalloc(void)
     memset((char*)r, 5, PGSIZE); // fill with junk
   return (void*)r;
 }
+
+// lab1 part1
+uint kfreesize(){
+  // loop through the linked list
+  struct run *r;
+  uint page_count = 0;
+  acquire(&kmem.lock);
+  r = kmem.freelist;
+  while(r){
+    page_count++;
+    r = r->next;
+  }
+  release(&kmem.lock);
+  
+  return page_count;
+}

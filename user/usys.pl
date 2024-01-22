@@ -36,5 +36,5 @@ entry("getpid");
 entry("sbrk");
 entry("sleep");
 entry("uptime");
-# hello syscall for user
-entry("hello");
+entry("hello"); # hello syscall for user
+entry("sysinfo"); # lab1 part1 sysinfo syscall for user

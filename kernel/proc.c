@@ -687,3 +687,35 @@ void print_hello(int n)
 {
   printf("Hello from the kernel space %d\n", n);
 }
+
+// lab1 part1 info: printing info msg
+int get_sysinfo(int n)
+{
+  if (n == 0) {
+    printf("case 0\n");
+    int active_count = 0;
+    struct proc *p;
+
+    for(p = proc; p < &proc[NPROC]; p++) {
+      if (p->state == SLEEPING || 
+          p->state == RUNNABLE || 
+          p->state == RUNNING || 
+          p->state == ZOMBIE) {
+            active_count++;
+          }
+    }
+
+    return active_count;
+  } else if (n == 1) {
+    printf("case 1\n");
+    printf("syscall_count = %d\n", syscall_count);
+    return syscall_count;
+  } else if (n == 2) {
+    printf("case 2\n");
+    return kfreesize();
+  } else {
+    printf("case 3\n");
+    return -1;
+  }
+  return 0;
+}
