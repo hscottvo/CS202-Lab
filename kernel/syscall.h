@@ -21,4 +21,5 @@
 #define SYS_mkdir  20
 #define SYS_close  21
 #define SYS_hello  22 // hello
-#define SYS_sysinfo   23 // lab1 part1
+#define SYS_sysinfo 23 // lab1 part1
+#define SYS_procinfo 24 // lab1 part2

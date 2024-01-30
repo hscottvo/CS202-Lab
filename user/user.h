@@ -1,4 +1,5 @@
 struct stat;
+struct pinfo; // lab1 part2
 
 // system calls
 int fork(void);
@@ -24,6 +25,7 @@ int sleep(int);
 int uptime(void);
 int hello(int); // hello
 int sysinfo(int); // lab1 part1 sysinfo
+int procinfo(struct pinfo*); // lab1 part2 procinfo
 
 // ulib.c
 int stat(const char*, struct stat*);

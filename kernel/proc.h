@@ -104,4 +104,12 @@ struct proc {
   struct file *ofile[NOFILE];  // Open files
   struct inode *cwd;           // Current directory
   char name[16];               // Process name (debugging)
+  uint64 syscall_count; // lab1 part2
+};
+
+// lab1 part2 check
+struct pinfo {
+  int ppid;
+  int syscall_count;
+  int page_usage;
 };

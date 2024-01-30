@@ -104,3 +104,10 @@ uint64 sys_sysinfo(void) // lab1 part1 sysinfo syscall definition
   argint(0, &n);
   return get_sysinfo(n);
 }
+
+uint64 sys_procinfo(void) // lab1 part2 procinfo syscall definition
+{
+  uint64 in;
+  argaddr(0, &in);
+  return get_procinfo(in);
+}
