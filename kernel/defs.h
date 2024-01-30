@@ -144,6 +144,7 @@ void            argaddr(int, uint64 *);
 int             fetchstr(uint64, char*, int);
 int             fetchaddr(uint64, uint64*);
 extern uint     syscall_count;
+extern uint     syscall_count;
 void            syscall();
 
 // trap.c

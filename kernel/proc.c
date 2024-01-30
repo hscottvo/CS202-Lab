@@ -5,12 +5,11 @@
 #include "spinlock.h"
 #include "proc.h"
 #include "defs.h"
-#include "math.h"
 
 struct cpu cpus[NCPU];
 
 struct proc proc[NPROC];
-// struct pinfo;
+
 
 struct proc *initproc;
 
@@ -147,7 +146,8 @@ found:
   memset(&p->context, 0, sizeof(p->context));
   p->context.ra = (uint64)forkret;
   p->context.sp = p->kstack + PGSIZE;
-  p->syscall_count = 0;
+  p->syscall_count = 0; // lab1 part2
+
 
   return p;
 }
@@ -172,7 +172,7 @@ freeproc(struct proc *p)
   p->killed = 0;
   p->xstate = 0;
   p->state = UNUSED;
-  p->syscall_count = 0;
+  p->syscall_count = 0; // lab1 part2
 }
 
 // Create a user page table for a given process, with no user memory,
@@ -695,8 +695,7 @@ void print_hello(int n)
 // lab1 part1 sysinfo: printing sysinfo msg
 int get_sysinfo(int n)
 {
-  if (n == 0) {
-    // printf("case 0\n");
+  if (n == 0) { 
     int active_count = 0;
     struct proc *p;
 
@@ -711,14 +710,10 @@ int get_sysinfo(int n)
 
     return active_count;
   } else if (n == 1) {
-    // printf("case 1\n");
-    // printf("syscall_count = %d\n", syscall_count);
     return syscall_count;
   } else if (n == 2) {
-    // printf("case 2\n");
     return kfreesize();
   } else {
-    // printf("case 3\n");
     return -1;
   }
   return 0;
