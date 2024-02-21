@@ -10,8 +10,8 @@ struct cpu cpus[NCPU];
 
 struct proc proc[NPROC];
 
-
 struct proc *initproc;
+uint64 K = 10000;
 
 int nextpid = 1;
 struct spinlock pid_lock;
@@ -147,8 +147,10 @@ found:
   p->context.ra = (uint64)forkret;
   p->context.sp = p->kstack + PGSIZE;
   p->syscall_count = 0; // lab1 part2
-
-
+  p->tickets = 10000; // lab2 part1
+  p->ticks = 0; // lab2 part1
+  p->stride = K / p->tickets; // lab2 part1 stride
+  p->pass = p->stride; // lab2 part1 stride
   return p;
 }
 
@@ -173,6 +175,10 @@ freeproc(struct proc *p)
   p->xstate = 0;
   p->state = UNUSED;
   p->syscall_count = 0; // lab1 part2
+  p->tickets = 10000; // lab2 part1
+  p->ticks = 0; // lab2 part1
+  p->stride = K / p->tickets; // lab2 part1 stride
+  p->pass = p->stride; // lab2 part1 stride
 }
 
 // Create a user page table for a given process, with no user memory,
@@ -438,6 +444,21 @@ wait(uint64 addr)
   }
 }
 
+// lab2 part2 rand
+// pseudo random generator (https://stackoverflow.com/a/7603688)
+unsigned short lfsr = 0xACE1u;
+unsigned short bit;
+unsigned short rand(void)
+{
+  bit = ((lfsr >> 0) ^ (lfsr >> 2) ^ (lfsr >> 3) ^ (lfsr >> 5)) & 1;
+  return lfsr = (lfsr >> 1) | (bit << 15);
+}
+// proc 1 100 proc 2 100 proc 3 100
+// proc 1 is scheduled if chose 0-99, proc 2 100 - 199
+// choose 500 (should be proc 2)
+// proc 1 -> tickets left for sched is 0
+// proc 2 -> tickets left for sched is -50 -> first time neg -> schedule process 2
+
 // Per-CPU process scheduler.
 // Each CPU calls scheduler() after setting itself up.
 // Scheduler never returns.  It loops, doing:
@@ -455,23 +476,78 @@ scheduler(void)
   for(;;){
     // Avoid deadlock by ensuring that devices can interrupt.
     intr_on();
-
-    for(p = proc; p < &proc[NPROC]; p++) {
-      acquire(&p->lock);
-      if(p->state == RUNNABLE) {
-        // Switch to chosen process.  It is the process's job
-        // to release its lock and then reacquire it
-        // before jumping back to us.
-        p->state = RUNNING;
-        c->proc = p;
-        swtch(&c->context, &p->context);
-
-        // Process is done running for now.
-        // It should have changed its p->state before coming back.
-        c->proc = 0;
+    #if defined(LOTTERY)
+      int tickets_count = 0;
+      for(p = proc; p < &proc[NPROC]; p++) {
+        if (p->state == RUNNABLE) {
+          tickets_count += p->tickets;
+        } 
       }
-      release(&p->lock);
-    }
+      // printf("%d\n", tickets_count);
+      int chosen_ticket = rand() % tickets_count;
+      for (p = proc; p < &proc[NPROC]; p++) {
+        acquire(&p->lock);
+        if(p->state == RUNNABLE) {
+          chosen_ticket -= p->tickets;
+          if (chosen_ticket < 0) {
+            p->state = RUNNING;
+            c->proc = p;
+            p->ticks++;
+            swtch(&c->context, &p->context);
+
+            c->proc = 0;
+            release(&p->lock);
+            break;
+          } 
+        }
+        release(&p->lock);
+      }
+    #elif defined(STRIDE)
+      uint64 min_pass = __UINT64_MAX__;
+      uint64 pid = 0;
+      for(p = proc; p < &proc[NPROC]; p++) {
+        if (p->state == RUNNABLE && p->pass <= min_pass) {
+          min_pass = p->pass;
+          pid = p->pid;
+        } 
+      }
+      for (p = proc; p < &proc[NPROC]; p++) {
+        acquire(&p->lock);
+        if(p->state == RUNNABLE) {
+          if (p->pid == pid) {
+            p->state = RUNNING;
+            c->proc = p;
+            p->ticks++;
+            swtch(&c->context, &p->context);
+
+
+            p->pass += p->stride;
+            c->proc = 0;
+            release(&p->lock);
+            break;
+          } 
+        }
+        release(&p->lock);
+      }
+    #else
+      for(p = proc; p < &proc[NPROC]; p++) {
+        acquire(&p->lock);
+        if(p->state == RUNNABLE) {
+          // Switch to chosen process.  It is the process's job
+          // to release its lock and then reacquire it
+          // before jumping back to us.
+          p->state = RUNNING;
+          c->proc = p;
+          swtch(&c->context, &p->context);
+
+          // Process is done running for now.
+          // It should have changed its p->state before coming back.
+          c->proc = 0;
+        }
+        release(&p->lock);
+      }
+    #endif
+
   }
 }
 
@@ -533,6 +609,9 @@ forkret(void)
 
   usertrapret();
 }
+
+// 2 tables, 1 for lottery 1 for stride
+// time ticks, 
 
 // Atomically release lock and sleep on chan.
 // Reacquires lock when awakened.
@@ -739,5 +818,37 @@ int get_procinfo(uint64 p)
     return -1;
   }
 
+  return 0;
+}
+
+// lab2 part1 sched_statistics: printing schedule statistics msg
+int print_sched_statistics(void) 
+{
+  struct proc *p;
+
+  for(p = proc; p < &proc[NPROC]; p++) {
+    if (p->state != UNUSED)
+      printf("%d(%s): tickets: %d, ticks: %d\n", p->pid, p->name, p->tickets, p->ticks);
+  }
+
+  return 0;
+}
+
+// lab2 part1 sched_tickets: set tickets for caller process
+// lab2 part1 stride: re-set stride value 
+int set_sched_tickets(int n)
+{
+  struct proc *p = myproc();
+  if (n <= 10000) {
+    p->tickets = n;
+    p->stride = K / n;
+    if (K % n != 0) {
+      p->stride++;
+    }
+    p->pass = p->stride;
+    // printf("tickets: %d, stride: %d, pass: %d\n", p->tickets, p->stride, p->pass);
+  } else {
+    exit(1);
+  }
   return 0;
 }

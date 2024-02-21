@@ -105,6 +105,10 @@ struct proc {
   struct inode *cwd;           // Current directory
   char name[16];               // Process name (debugging)
   uint64 syscall_count; // lab1 part2
+  uint64 tickets; // lab2 part2 lottery/stride
+  uint64 ticks; // lab2 part2 lottery/stride
+  uint64 pass; // lab2 part2 stride
+  uint64 stride; // lab2 part2 stride
 };
 
 // lab1 part2 check

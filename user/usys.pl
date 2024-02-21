@@ -39,3 +39,5 @@ entry("uptime");
 entry("hello"); # hello syscall for user
 entry("sysinfo"); # lab1 part1 sysinfo syscall for user
 entry("procinfo"); # lab1 part2 procinfo syscall for user
+entry("sched_statistics"); # lab2 part1 sched_statistics syscall for user
+entry("sched_tickets"); # lab2 part1 sched_tickets syscall for user

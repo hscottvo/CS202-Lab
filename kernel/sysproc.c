@@ -111,3 +111,15 @@ uint64 sys_procinfo(void) // lab1 part2 procinfo syscall definition
   argaddr(0, &in);
   return get_procinfo(in);
 }
+
+uint64 sys_sched_statistics(void) // lab2 part1 sched_statistics syscall definition
+{
+  return print_sched_statistics();
+}
+
+uint64 sys_sched_tickets(void) // lab2 part1 sched_tickets syscall definition
+{
+  int n;
+  argint(0, &n);
+  return set_sched_tickets(n);
+}

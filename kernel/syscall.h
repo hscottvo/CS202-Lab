@@ -23,3 +23,5 @@
 #define SYS_hello  22 // hello
 #define SYS_sysinfo 23 // lab1 part1
 #define SYS_procinfo 24 // lab1 part2
+#define SYS_sched_statistics 25 // lab2 part1
+#define SYS_sched_tickets 26 // lab2 part1

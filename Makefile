@@ -70,6 +70,10 @@ endif
 ifneq ($(shell $(CC) -dumpspecs 2>/dev/null | grep -e '[^f]nopie'),)
 CFLAGS += -fno-pie -nopie
 endif
+LAB2 = RR # lab2 part2 set scheduler config
+# LAB2 = LOTTERY
+# LAB2 = STRIDE
+CFLAGS += -D$(LAB2) # lab2 part2 set scheduler config
 
 LDFLAGS = -z max-page-size=4096
 
@@ -135,6 +139,7 @@ UPROGS=\
 	$U/_test\
 	$U/_test_sysinfo\
 	$U/_lab1_test\
+	$U/_lab2\
 	
 fs.img: mkfs/mkfs README $(UPROGS)
 	mkfs/mkfs fs.img README $(UPROGS)

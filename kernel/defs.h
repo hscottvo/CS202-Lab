@@ -107,9 +107,12 @@ void            yield(void);
 int             either_copyout(int user_dst, uint64 dst, void *src, uint64 len);
 int             either_copyin(void *dst, int user_src, uint64 src, uint64 len);
 void            procdump(void);
-void            print_hello(int); //hello
-int             get_sysinfo(int); //lab1 part1 sysinfo
-int             get_procinfo(uint64); //lab1 part2 procinfo
+void            print_hello(int); // hello
+int             get_sysinfo(int); // lab1 part1 sysinfo
+int             get_procinfo(uint64); // lab1 part2 procinfo
+unsigned short  rand(void); // lab2 part2 rand
+int             print_sched_statistics(void); // lab2 part1 sched_statistics
+int             set_sched_tickets(int); // lab2 part1 sched_tickets
 
 // swtch.S
 void            swtch(struct context*, struct context*);
@@ -143,7 +146,7 @@ int             argstr(int, char*, int);
 void            argaddr(int, uint64 *);
 int             fetchstr(uint64, char*, int);
 int             fetchaddr(uint64, uint64*);
-extern uint     syscall_count;
+extern uint     syscall_count; // lab1 part1 syscall_count
 void            syscall();
 
 // trap.c
